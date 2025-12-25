@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Real-Stack Console v1.7</title>
+  <style>
+    :root {
+      /* Colors */
+      --rs-bg: #050608;
+      --rs-panel: #111417;
+      --rs-panel-raised: #181c20;
+      --rs-screen: #17251c;
+      --rs-accent: #c96732;
+      --rs-accent-dark: #9a4e26;
+      --rs-outline: #202428;
+
+      /* Geometry */
+      --rs-radius-outer: 4px;
+      --rs-radius-inner: 4px;
+      --rs-radius-screen: 4px;
+
+      /* Shadows */
+      --rs-shadow-panel: 0 18px 45px rgba(0, 0, 0, 0.75);
+      --rs-shadow-inner: 0 8px 18px rgba(0, 0, 0, 0.7);
+      --rs-shadow-inset-strong: inset 0 0 0 1px rgba(0, 0, 0, 0.85);
+      --rs-shadow-inset-soft: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #171b1f 0, #050608 55%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        sans-serif;
+      font-size: 20px;
+      color: #1d1d1d;
+    }
+
+    .console-wrapper {
+      width: 100%;
+      padding: 50px;
+      background: transparent;
+    }
+
+    .console {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--rs-panel);
+      border-radius: var(--rs-radius-outer);
+      box-shadow: var(--rs-shadow-panel);
+      position: relative;
+      padding: 22px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Inner plate that holds etch + modules */
+    .console-inner {
+      background: var(--rs-panel-raised);
+      border-radius: var(--rs-radius-outer);
+      box-shadow: var(--rs-shadow-inset-soft), var(--rs-shadow-inset-strong);
+      padding: 12px 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 1.1fr);
+      column-gap: 24px;
+      align-items: stretch;
+      height: 100%;
+    }
+
+    /* Screws at outer corners */
+    .console-screw {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #34373b, #14171a);
+      box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.9),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .console-screw::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 0, 0, 0.85);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .console-screw--tl { top: 8px; left: 8px; }
+    .console-screw--tr { top: 8px; right: 8px; }
+    .console-screw--bl { bottom: 8px; left: 8px; }
+    .console-screw--br { bottom: 8px; right: 8px; }
+
+    /* Etch area (main screen) */
+    .etch-shell {
+      height: 100%;
+      border-radius: var(--rs-radius-inner);
+      background: #14181c;
+      box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.7),
+        var(--rs-shadow-inset-strong);
+      padding: 4px 4px;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .etch-frame {
+      flex: 1;
+      border-radius: var(--rs-radius-inner);
+      background: linear-gradient(
+        to bottom,
+        var(--rs-accent),
+        var(--rs-accent-dark)
+      );
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.8);
+      padding: 2px;
+      display: flex;
+    }
+
+    .etch-screen {
+      flex: 1;
+      border-radius: var(--rs-radius-screen);
+      background:
+        radial-gradient(circle at 20% 15%, #495149 0, #2c3830 95%, #0e1510 150%);
+      box-shadow:
+        inset 0 0 0 1px #151d17,
+        inset 0 12px 22px rgba(0, 0, 0, 0.7),
+        inset 0 -10px 18px rgba(0, 0, 0, 0.9);
+      padding: 24px;
+    }
+
+    .etch-stamp {
+      position: absolute;
+      bottom: 4px;          /* Places the bottom edge of the child at the bottom of the parent */
+      right: 4px;           /* Places the right edge of the child at the right of the parent */
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 700;
+      font-size: 1.5em;
+      letter-spacing: 0.15em;
+
+      color: #1f1f1f; /* very close to background */
+
+      text-shadow:
+        -1px -1px 1px rgba(255,255,255,0.08), /* highlight */
+        1px  1px 1px rgba(0,0,0,0.6);        /* shadow */
+
+      user-select: none;
+    }
+
+    /* TODO: ⓘ stamp single-line ring (reduce inner/outer shadow) */
+    .etch-info {
+      font-size: 0.55em;
+      color: #505050;
+      vertical-align: super;
+    }
+
+        /* --- Vector knob (starter) --- */
+    .vector-knob {
+      /* tweak these two numbers freely */
+      --vk-size: 130px;
+      --vk-max-lean: 12px; /* max cap deflection */
+
+      /* internal state set by JS */
+      --vk-x: 0px;
+      --vk-y: 0px;
+      --vk-rot: 0deg;
+
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -50%);
+      width: var(--vk-size);
+      height: var(--vk-size);
+      border-radius: 50%;
+
+      /* recessed "well" */
+      background: #111;
+      box-shadow:
+        inset 2px 2px 6px rgba(0,0,0,0.75),
+        inset -1px -1px 1px rgba(255,255,255,0.04);
+
+      /* keep it calm */
+      user-select: none;
+      touch-action: none;
+    }
+
+    .vk-ring {
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      /* subtle ring edge */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.05),
+        inset 0 0 0 2px rgba(0,0,0,0.55);
+    }
+
+    .vk-tick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 2px;
+      height: 16px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 2px;
+
+      /* reliable radial placement */
+      transform-origin: 50% 100%;
+      transform: translate(-50%, -50%) rotate(var(--a)) translateY(-80px);
+    }
+
+/*
+    .vk-n  { --a: 270deg; } 
+    .vk-ne { --a: 315deg; } 
+    .vk-nw { --a: 225deg; } 
+    .vk-e  { --a:   0deg; } 
+    .vk-w  { --a: 180deg; } 
+*/
+
+    .vk-n  { --a: 0deg; } /* up */
+    .vk-ne { --a: 45deg; } /* up-right */
+    .vk-nw { --a: 315deg; } /* up-left */
+    .vk-e  { --a:   90deg; } /* right */
+    .vk-w  { --a: 270deg; } /* left */
+
+
+    .vk-cap {
+      position: absolute;
+      inset: 26px;
+      border-radius: 50%;
+
+      /* raised cap */
+      background: #161a1d;
+      box-shadow:
+        0 10px 18px rgba(0,0,0,0.60),
+        inset 1px 1px 1px rgba(255,255,255,0.06),
+        inset -2px -3px 6px rgba(0,0,0,0.80);
+
+      /* the only "motion": lean + rotate, no easing */
+      transform:
+        translate(var(--vk-x), var(--vk-y))
+        rotate(var(--vk-rot));
+    }
+
+    .vk-dot {
+      position: absolute;
+      left: 50%;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background: var(--rs-accent); /* your orange */
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.55);
+    }
+
+    .vk-dimple {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.25);
+      box-shadow:
+        inset 1px 1px 2px rgba(0,0,0,0.75),
+        inset -1px -1px 1px rgba(255,255,255,0.05);
+    }
+
+
+    /* Right column modules */
+    .module-column {
+      display: grid;
+      grid-template-rows: repeat(4, 1fr);
+      row-gap: 16px;
+      align-items: stretch;
+    }
+
+    .module {
+      background: #14181b;
+      border-radius: var(--rs-radius-inner);
+      box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.65),
+        var(--rs-shadow-inset-strong);
+      padding: 4px;
+      display: flex;
+    }
+
+    .module-frame {
+      flex: 1;
+      border-radius: var(--rs-radius-inner);
+      background: linear-gradient(
+        to bottom,
+        var(--rs-accent),
+        var(--rs-accent-dark)
+      );
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.75);
+      padding: 2px;
+      display: flex;
+    }
+
+    .module-screen {
+      flex: 1;
+      border-radius: var(--rs-radius-screen);
+      background:
+        radial-gradient(circle at 30% 20%, #495149 0, #2c3830 95%, #0f1511 100%);
+      box-shadow:
+        inset 0 0 0 1px #151d17,
+        inset 0 6px 12px rgba(0, 0, 0, 0.6),
+        inset 0 -4px 9px rgba(0, 0, 0, 0.8);
+      padding: 16px;
+    }
+
+    .module-panel {
+      position: relative;
+      width: 100%;
+      background: #141414; /* slightly darker than rack */
+      border-radius: 4px;
+      padding: 8px;
+
+      /* Cut-in effect */
+      box-shadow:
+        inset 1px 1px 2px rgba(0,0,0,0.6),
+        inset -1px -1px 1px rgba(255,255,255,0.04);
+
+      /* Thin edge to suggest drop-in */
+      outline: 4px solid rgba(255,255,255,0.05);
+    }
+
+    /* Very basic responsiveness */
+    @media (max-width: 780px) {
+      .console {
+        aspect-ratio: 16 / 9;
+        padding: 18px 16px;
+      }
+
+      .console-inner {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        row-gap: 20px;
+      }
+
+      .module-column {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: none;
+        column-gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="console-wrapper">
+    <div class="console">
+      <!-- Outer screws -->
+      <div class="console-screw console-screw--tl"></div>
+      <div class="console-screw console-screw--tr"></div>
+      <div class="console-screw console-screw--bl"></div>
+      <div class="console-screw console-screw--br"></div>
+
+      <div class="console-inner">
+        <!-- Left: Etch main screen -->
+        <section class="etch-shell">
+          <div class="etch-frame">
+            <div class="etch-screen">
+              <!-- Etch drawing will live here later -->
+               Hello, Real-Stack Console v1.7!
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: 4 stacked modules -->
+        <aside class="module-column">
+          <div class="module">
+            <div class="module-frame">
+              <div class="module-panel">
+                <!-- Vector knob -->
+                <div class="vector-knob" id="etchKnob" aria-label="Etch Vector Knob">
+                  <div class="vk-ring">
+                    <!-- 5 ticks: N, NE, NW, E, W -->
+                    <span class="vk-tick vk-n"></span>
+                    <span class="vk-tick vk-ne"></span>
+                    <span class="vk-tick vk-nw"></span>
+                    <span class="vk-tick vk-e"></span>
+                    <span class="vk-tick vk-w"></span>
+                  </div>
+
+                  <div class="vk-cap">
+                    <div class="vk-dot" aria-hidden="true"></div>
+                    <div class="vk-dimple" aria-hidden="true"></div>
+                  </div>
+                </div>
+                <!-- ETCH stamp -->
+                <div class="etch-stamp">
+                  ETCH <span class="etch-info" aria-label="Info">ⓘ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="module">
+            <div class="module-frame">
+              <div class="module-panel">
+              </div>
+            </div>
+          </div>
+          <div class="module">
+            <div class="module-frame">
+              <div class="module-panel">
+              </div>
+            </div>
+          </div>
+          <div class="module">
+            <div class="module-frame">
+              <div class="module-panel">
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const knob = document.getElementById("etchKnob");
+      if (!knob) return;
+
+      const cap = knob.querySelector(".vk-cap");
+
+      let dragging = false;
+
+      function setVector(dx, dy) {
+        const rect = knob.getBoundingClientRect();
+        const maxR = rect.width * 0.35; // usable radius
+        const r = Math.hypot(dx, dy);
+
+        // Clamp vector
+        const clampedR = Math.min(r, maxR);
+        const nx = r === 0 ? 0 : (dx / r);
+        const ny = r === 0 ? 0 : (dy / r);
+        const cx = nx * clampedR;
+        const cy = ny * clampedR;
+
+        // Strength 0..1
+        let strength = maxR === 0 ? 0 : (clampedR / maxR);
+
+        // Optional "backwards is costly" damping:
+        // screen y+ is down, so "backwards" is dy > 0
+        if (dy > 0) strength *= 0.35;
+
+        // Angle in radians (CSS rotation needs deg)
+        const angle = Math.atan2(dy, dx);
+
+        // If in back half (dy > 0), snap angle to E or W
+        if (dy > 0) {
+          angle = dx >= 0 ? 0 : Math.PI; // 0 rad = E, PI = W
+        }
+        
+        const deg = angle * (180 / Math.PI) + 90;
+
+        // Lean cap less than pointer travel (feels weighted)
+        const maxLean = parseFloat(getComputedStyle(knob).getPropertyValue("--vk-max-lean")) || 14;
+        const lean = strength * maxLean;
+
+        const lx = nx * lean;
+        const ly = ny * lean;
+
+        cap.style.setProperty("--vk-x", `${lx.toFixed(2)}px`);
+        cap.style.setProperty("--vk-y", `${ly.toFixed(2)}px`);
+        cap.style.setProperty("--vk-rot", `${deg.toFixed(2)}deg`);
+
+        // Emit a custom event you can listen to for drawing
+        knob.dispatchEvent(new CustomEvent("vectorchange", {
+          detail: { x: nx, y: ny, angle, strength }
+        }));
+      }
+
+      function centerVector() {
+        cap.style.setProperty("--vk-x", `0px`);
+        cap.style.setProperty("--vk-y", `0px`);
+        cap.style.setProperty("--vk-rot", `0deg`);
+        knob.dispatchEvent(new CustomEvent("vectorchange", {
+          detail: { x: 0, y: 0, angle: 0, strength: 0 }
+        }));
+      }
+
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        centerVector();
+      }
+
+      window.addEventListener("pointerup", endDrag);
+      window.addEventListener("pointercancel", endDrag);
+      window.addEventListener("blur", endDrag);
+
+      knob.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        dragging = true;
+        knob.setPointerCapture(e.pointerId);
+
+        const rect = knob.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        setVector(e.clientX - cx, e.clientY - cy);
+      });
+
+      knob.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+
+        const rect = knob.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        setVector(e.clientX - cx, e.clientY - cy);
+      });
+
+      knob.addEventListener("pointerup", () => {
+        dragging = false;
+        centerVector(); // release -> stop
+      });
+
+      knob.addEventListener("pointercancel", () => {
+        dragging = false;
+        centerVector();
+      });
+
+      // Example: log the vector (remove later)
+      knob.addEventListener("vectorchange", (e) => {
+        // console.log(e.detail);
+      });
+    })();
+  </script>
+
+</body>
+</html>
