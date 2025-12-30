@@ -1,7 +1,7 @@
 /* Handheld / portrait layout
    - Screen on top
    - Horizontal, swipeable module rail underneath
-   - Preserves all DOM + JS contracts
+   - Preserves DOM + JS contracts
 */
 
 @media (max-width: 900px) and (orientation: portrait) {
@@ -10,11 +10,11 @@
     aspect-ratio: auto;
   }
 
-  /* Stack screen + rail as a bonded unit */
+  /* Stack screen + rail */
   .console-inner {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
     height: auto;
 
     /* override grid rules from console.css */
@@ -22,36 +22,28 @@
     grid-template-rows: none !important;
   }
 
-  /* --- Screen --- */
+  /* ---------- 70 / 30 split ---------- */
+  /* Screen takes ~70% */
   .etch-shell {
     width: 100%;
-    flex: 0 0 auto;
-
-    /* 70/30 balance: screen yields space to controls */
-    max-height: 56vh; /* tweak 54–58 by feel */
+    flex: 0 0 68vh;          /* “screen band” height */
+    max-height: 68vh;
   }
 
-  .etch-frame,
-  .etch-screen {
-    height: 100%;
-  }
-
-  /* --- Module rail --- */
+  /* Rail takes ~30% */
   .module-column {
-    flex: 0 0 auto;
-
-    /* Physical control band */
-    min-height: 160px;
-    height: 24vh;        /* tweak 36–40 by feel */
-    max-height: 260px;
+    flex: 0 0 28vh;
+    height: 28vh;
+    min-height: 240px;       /* ensures it's an instrument, not a sliver */
+    max-height: 360px;
 
     display: flex;
     flex-direction: row;
     align-items: stretch;
     gap: 14px;
 
-    /* Bezel / breathing room (restores right orange border) */
-    padding: 14px 28px 18px 16px;
+    /* align rail edge to screen edge */
+    padding: 14px 16px 18px;
     box-sizing: border-box;
 
     overflow-x: auto;
@@ -60,26 +52,20 @@
 
     scroll-snap-type: x mandatory;
     scroll-padding-left: 16px;
-    scroll-padding-right: 28px;
+    scroll-padding-right: 16px;
 
-    /* Allow horizontal swipe without stealing knob drags */
+    /* swipe rail horizontally; knob will opt out */
     touch-action: pan-x;
   }
 
-  .module-column::-webkit-scrollbar {
-    display: none;
-  }
-  .module-column {
-    scrollbar-width: none;
-  }
+  .module-column::-webkit-scrollbar { display: none; }
+  .module-column { scrollbar-width: none; }
 
-  /* Each module becomes a chunky “instrument card” */
+  /* No peeking: one full-width card per swipe */
   .module-column > .module {
     flex: 0 0 auto;
-    width: 82vw;        /* shows a hint of the next module */
-    max-width: 560px;
+    width: 100%;
     height: 100%;
-
     scroll-snap-align: start;
   }
 
@@ -89,13 +75,19 @@
     height: 100%;
   }
 
-  /* --- Knob interaction reliability --- */
+  /* Ensure the screen fills its band cleanly */
+  .etch-frame,
+  .etch-screen {
+    height: 100%;
+  }
+
+  /* ---------- Knob interaction reliability ---------- */
   #etchKnob {
     position: relative;
     z-index: 5;
 
     pointer-events: auto;
-    touch-action: none;     /* knob always wins drags */
+    touch-action: none;       /* knob always wins drags */
 
     user-select: none;
     -webkit-user-select: none;
@@ -106,4 +98,88 @@
   #etchKnob .vk-ring {
     pointer-events: auto;
   }
+
+  /* ---------- Knob: big hit target, smaller visuals ---------- */
+  .vector-knob {
+    --vk-size: 108px;         /* tweak 96–116 */
+    --vk-max-lean: 10px;
+
+    /* Big touch target */
+    width: calc(var(--vk-size) + 64px);
+    height: calc(var(--vk-size) + 64px);
+
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+
+    /* invisible hitpad */
+    background: transparent;
+    box-shadow: none;
+
+    touch-action: none;
+  }
+
+  /* draw the visual “base knob” */
+  .vector-knob::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--vk-size);
+    height: var(--vk-size);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #111;
+    box-shadow:
+      inset 2px 2px 6px rgba(0,0,0,0.75),
+      inset -1px -1px 1px rgba(255,255,255,0.04);
+    pointer-events: none;
+  }
+
+  /* Convert ring/cap off inset-based sizing into explicit sizing */
+  .vk-ring {
+    position: absolute;
+    inset: auto;              /* IMPORTANT: disable console.css inset */
+    left: 50%;
+    top: 50%;
+    width: calc(var(--vk-size) - 40px);
+    height: calc(var(--vk-size) - 40px);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.05),
+      inset 0 0 0 2px rgba(0,0,0,0.55);
+    pointer-events: none;
+  }
+
+  .vk-cap {
+    position: absolute;
+    inset: auto;              /* IMPORTANT: disable console.css inset */
+    left: 50%;
+    top: 50%;
+    width: calc(var(--vk-size) - 52px);
+    height: calc(var(--vk-size) - 52px);
+    border-radius: 50%;
+    background: #161a1d;
+    box-shadow:
+      0 10px 18px rgba(0,0,0,0.60),
+      inset 1px 1px 1px rgba(255,255,255,0.06),
+      inset -2px -3px 6px rgba(0,0,0,0.80);
+
+    transform:
+      translate(-50%, -50%)
+      translate(var(--vk-x, 0px), var(--vk-y, 0px))
+      rotate(var(--vk-rot, 0deg));
+  }
+
+  .vk-tick {
+    height: 14px;
+    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-58px);
+    pointer-events: none;
+  }
+
+  .vk-dot { width: 9px; height: 9px; top: 6px; }
+  .vk-dimple { width: 12px; height: 12px; }
 }
