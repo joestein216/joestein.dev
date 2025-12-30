@@ -1,0 +1,51 @@
+/* handheld.css
+   Handheld / portrait behavior overrides only.
+   Load this AFTER your main stylesheet(s). */
+
+@media (max-width: 760px) and (orientation: portrait) {
+  /* This assumes your module container has a class of .module-panel
+     and each module has .module
+     (Adjust selectors if yours differ.) */
+
+  .module-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+
+    /* horizontal swipe */
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    /* snap to each module */
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 12px;
+
+    padding: 12px;
+    max-width: 100%;
+
+    /* optional: keep it clearly "below" */
+    margin-top: 12px;
+  }
+
+  /* hide scrollbars */
+  .module-panel::-webkit-scrollbar { display: none; }
+  .module-panel { scrollbar-width: none; }
+
+  .module-panel .module {
+    flex: 0 0 auto;
+
+    /* This is the “feel” knob. Tweak by hand:
+       70vw = shows more peek of next
+       85vw = more focused, less peek */
+    width: 78vw;
+    max-width: 520px;
+
+    scroll-snap-align: start;
+  }
+
+  /* Optional: if your modules were full-width/height in desktop,
+     keep them from stretching weirdly in the rail. */
+  .module-panel .module > * {
+    max-width: 100%;

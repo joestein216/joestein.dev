@@ -1,91 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Real-Stack Console v1.7</title>
-  <link rel="stylesheet" href="./assets/console.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Etch</title>
 
-<body>
-  <div class="console-wrapper">
-    <div class="console" role="application" aria-label="Real-Stack Console">
-      <!-- Outer screws -->
-      <div class="console-screw console-screw--tl"></div>
-      <div class="console-screw console-screw--tr"></div>
-      <div class="console-screw console-screw--bl"></div>
-      <div class="console-screw console-screw--br"></div>
+    <!-- Your existing styles -->
+    <link rel="stylesheet" href="./styles.css" />
 
-      <div class="console-inner">
-        <!-- Left: Etch main screen -->
-        <section class="etch-shell" aria-label="Etch Screen">
-          <div class="etch-frame">
-            <div class="etch-screen">
-              <!-- Canvas is the only “etch display” surface -->
-              <canvas
-                id="etchCanvas"
-                width="400"
-                height="300"
-                aria-label="Etch drawing surface"
-              ></canvas>
-            </div>
-          </div>
-        </section>
+    <!-- Handheld overrides (must be after styles.css) -->
+    <link rel="stylesheet" href="./handheld.css" />
+  </head>
 
-        <!-- Right: 4 stacked modules -->
-        <aside class="module-column" aria-label="Modules">
-          <!-- Module 1: Vector knob + stamp -->
-          <div class="module">
-            <div class="module-frame">
-              <div class="module-panel">
-                <div class="vector-knob" id="etchKnob" aria-label="Etch Vector Knob">
-                  <div class="vk-ring">
-                    <span class="vk-tick vk-n"></span>
-                    <span class="vk-tick vk-ne"></span>
-                    <span class="vk-tick vk-nw"></span>
-                    <span class="vk-tick vk-e"></span>
-                    <span class="vk-tick vk-w"></span>
-                  </div>
+  <body>
+    <main class="app">
+      <!-- Screen / display area -->
+      <section class="screen-wrap">
+        <!-- Whatever you currently use for the display -->
+        <canvas id="etchCanvas" width="400" height="300"></canvas>
+      </section>
 
-                  <div class="vk-cap">
-                    <div class="vk-dot" aria-hidden="true"></div>
-                    <div class="vk-dimple" aria-hidden="true"></div>
-                  </div>
-                </div>
+      <!-- Module panel -->
+      <section class="module-panel" aria-label="Modules">
+        <!-- Module 1: Knob (keep this first so the rail lands here) -->
+        <div class="module module--knob" aria-label="Knob module">
+          <!-- Keep your existing knob markup here -->
+          <div id="knobRoot"></div>
+        </div>
 
-                <div class="etch-stamp">
-                  ETCH <span class="etch-info" aria-label="Info">ⓘ</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Module 2: Placeholder -->
+        <div class="module module--placeholder" aria-label="Module 2">
+          <!-- Placeholder content can be empty; keep the frame -->
+        </div>
 
-          <!-- Module 2: Placeholder -->
-          <div class="module">
-            <div class="module-frame">
-              <div class="module-panel"></div>
-            </div>
-          </div>
+        <!-- Module 3: Placeholder -->
+        <div class="module module--placeholder" aria-label="Module 3"></div>
 
-          <!-- Module 3: Placeholder -->
-          <div class="module">
-            <div class="module-frame">
-              <div class="module-panel"></div>
-            </div>
-          </div>
+        <!-- Module 4: Placeholder -->
+        <div class="module module--placeholder" aria-label="Module 4"></div>
+      </section>
+    </main>
 
-          <!-- Module 4: Placeholder -->
-          <div class="module">
-            <div class="module-frame">
-              <div class="module-panel"></div>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </div>
-  </div>
-
-  <!-- One entrypoint: assembles Etch + registers devices + starts sampling loop -->
-  <script type="module" src="./etch/main.js"></script>
-</body>
+    <!-- Your existing scripts -->
+    <script src="./app.js"></script>
+  </body>
 </html>
