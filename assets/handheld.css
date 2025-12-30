@@ -176,7 +176,7 @@
 
   .vk-tick {
     height: 11px;
-    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-54px);
+    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-58px);
     pointer-events: none;
   }
 
