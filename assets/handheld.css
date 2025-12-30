@@ -1,51 +1,109 @@
-/* handheld.css
-   Handheld / portrait behavior overrides only.
-   Load this AFTER your main stylesheet(s). */
+/* Handheld / portrait layout
+   - Screen on top
+   - Horizontal, swipeable module rail underneath
+   - Preserves all DOM + JS contracts
+*/
 
-@media (max-width: 760px) and (orientation: portrait) {
-  /* This assumes your module container has a class of .module-panel
-     and each module has .module
-     (Adjust selectors if yours differ.) */
+@media (max-width: 900px) and (orientation: portrait) {
+  /* Let the device grow vertically (no forced 16:9) */
+  .console {
+    aspect-ratio: auto;
+  }
 
-  .module-panel {
+  /* Stack screen + rail as a bonded unit */
+  .console-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    height: auto;
+
+    /* override grid rules from console.css */
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+  }
+
+  /* --- Screen --- */
+  .etch-shell {
+    width: 100%;
+    flex: 0 0 auto;
+
+    /* 70/30 balance: screen yields space to controls */
+    max-height: 56vh; /* tweak 54–58 by feel */
+  }
+
+  .etch-frame,
+  .etch-screen {
+    height: 100%;
+  }
+
+  /* --- Module rail --- */
+  .module-column {
+    flex: 0 0 auto;
+
+    /* Physical control band */
+    min-height: 160px;
+    height: 24vh;        /* tweak 36–40 by feel */
+    max-height: 260px;
+
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    gap: 12px;
+    gap: 14px;
 
-    /* horizontal swipe */
+    /* Bezel / breathing room (restores right orange border) */
+    padding: 14px 28px 18px 16px;
+    box-sizing: border-box;
+
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
 
-    /* snap to each module */
     scroll-snap-type: x mandatory;
-    scroll-padding-left: 12px;
+    scroll-padding-left: 16px;
+    scroll-padding-right: 28px;
 
-    padding: 12px;
-    max-width: 100%;
-
-    /* optional: keep it clearly "below" */
-    margin-top: 12px;
+    /* Allow horizontal swipe without stealing knob drags */
+    touch-action: pan-x;
   }
 
-  /* hide scrollbars */
-  .module-panel::-webkit-scrollbar { display: none; }
-  .module-panel { scrollbar-width: none; }
+  .module-column::-webkit-scrollbar {
+    display: none;
+  }
+  .module-column {
+    scrollbar-width: none;
+  }
 
-  .module-panel .module {
+  /* Each module becomes a chunky “instrument card” */
+  .module-column > .module {
     flex: 0 0 auto;
-
-    /* This is the “feel” knob. Tweak by hand:
-       70vw = shows more peek of next
-       85vw = more focused, less peek */
-    width: 78vw;
-    max-width: 520px;
+    width: 82vw;        /* shows a hint of the next module */
+    max-width: 560px;
+    height: 100%;
 
     scroll-snap-align: start;
   }
 
-  /* Optional: if your modules were full-width/height in desktop,
-     keep them from stretching weirdly in the rail. */
-  .module-panel .module > * {
-    max-width: 100%;
+  .module,
+  .module-frame,
+  .module-panel {
+    height: 100%;
+  }
+
+  /* --- Knob interaction reliability --- */
+  #etchKnob {
+    position: relative;
+    z-index: 5;
+
+    pointer-events: auto;
+    touch-action: none;     /* knob always wins drags */
+
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  #etchKnob .vk-cap,
+  #etchKnob .vk-ring {
+    pointer-events: auto;
+  }
+}
