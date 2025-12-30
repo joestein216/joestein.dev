@@ -26,16 +26,16 @@
   /* Screen takes ~70% */
   .etch-shell {
     width: 100%;
-    flex: 0 0 68vh;          /* “screen band” height */
-    max-height: 68vh;
+    flex: 0 0 62vh;          /* “screen band” height */
+    max-height: 62vh;
   }
 
   /* Rail takes ~30% */
   .module-column {
     flex: 0 0 28vh;
-    height: 28vh;
-    min-height: 240px;       /* ensures it's an instrument, not a sliver */
-    max-height: 360px;
+    height: 34vh;
+    min-height: 260px;       /* ensures it's an instrument, not a sliver */
+    max-height: 380px;
 
     display: flex;
     flex-direction: row;
@@ -101,12 +101,12 @@
 
   /* ---------- Knob: big hit target, smaller visuals ---------- */
   .vector-knob {
-    --vk-size: 108px;         /* tweak 96–116 */
-    --vk-max-lean: 10px;
+    --vk-size: 96px;         /* tweak 96–116 */
+    --vk-max-lean: 9px;
 
     /* Big touch target */
-    width: calc(var(--vk-size) + 64px);
-    height: calc(var(--vk-size) + 64px);
+    width: calc(var(--vk-size) + 72px);
+    height: calc(var(--vk-size) + 72px);
 
     position: absolute;
     left: 50%;
@@ -175,8 +175,8 @@
   }
 
   .vk-tick {
-    height: 14px;
-    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-58px);
+    height: 11px;
+    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-54px);
     pointer-events: none;
   }
 
