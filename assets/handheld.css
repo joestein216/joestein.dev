@@ -4,7 +4,7 @@
    - Preserves DOM + JS contracts
 */
 
-@media (max-width: 900px) and (orientation: portrait) {
+@media (max-width: 780px) and (orientation: portrait) {
   /* Let the device grow vertically (no forced 16:9) */
   .console {
     aspect-ratio: auto;
@@ -79,6 +79,37 @@
   .etch-frame,
   .etch-screen {
     height: 100%;
+    padding: 14px;
+    position: relative; /* needed for overlay */
+    overflow: hidden;   /* keeps grain inside rounded corners */
+  }
+
+  .etch-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+
+    /* fake grain using layered gradients (no asset) */
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.015) 0px,
+        rgba(255,255,255,0.015) 1px,
+        rgba(0,0,0,0.015) 2px,
+        rgba(0,0,0,0.015) 3px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.010) 0px,
+        rgba(255,255,255,0.010) 1px,
+        rgba(0,0,0,0.010) 2px,
+        rgba(0,0,0,0.010) 3px
+      );
+
+    opacity: 0.35;              /* try 0.20–0.40 */
+    mix-blend-mode: overlay;    /* feels like plastic texture */
   }
 
   /* ---------- Knob interaction reliability ---------- */
@@ -92,6 +123,11 @@
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+  }
+
+  #etchCanvas {
+    image-rendering: pixelated;
+    filter: contrast(1.15) brightness(0.92);
   }
 
   #etchKnob .vk-cap,

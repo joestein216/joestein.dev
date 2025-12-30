@@ -1,0 +1,28 @@
+/* Tablet band: keep console layout, tighten proportions */
+@media (min-width: 781px) and (max-width: 1100px) {
+  .console-inner {
+    grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 10px;
+  }
+
+  /* Slightly reduce screen padding so the visible screen grows */
+  .etch-screen {
+    padding: 18px; /* base is 24px in console.css */
+  }
+
+  /* Modules: keep stacked column but reduce spacing a bit */
+  .module-column {
+    row-gap: 12px; /* base is 16px */
+  }
+
+  /* Knob: shrink just enough for tight module widths */
+  .vector-knob {
+    --vk-size: 112px;      /* base is 130px */
+    --vk-max-lean: 10px;
+  }
+
+  /* If the issue is the knob visually spilling outside the module panel,
+     you can contain it. Use this only if needed. */
+  /* .module-panel { overflow: hidden; } */
+}
