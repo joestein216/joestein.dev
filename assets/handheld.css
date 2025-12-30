@@ -79,7 +79,6 @@
   .etch-frame,
   .etch-screen {
     height: 100%;
-    padding: 14px;
     position: relative; /* needed for overlay */
     overflow: hidden;   /* keeps grain inside rounded corners */
   }
